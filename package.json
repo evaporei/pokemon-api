@@ -1,0 +1,19 @@
+{
+  "name": "pokemon",
+  "version": "1.0.0",
+  "description": "An express api about pokemons",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.15.4",
+    "request": "^2.81.0",
+    "request-promise": "^4.0.0",
+    "sequelize": "^4.5.0",
+    "sqlite3": "^3.1.4"
+  }
+}
