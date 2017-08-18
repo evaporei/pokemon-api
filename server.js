@@ -4,7 +4,6 @@ const Sequelize = require('sequelize')
 const sequelize = new Sequelize('pokemons', null, null, {
 	dialect: 'sqlite'
 })
-const bodyParser = require('body-parser')
 const request = require('request-promise')
 const applyMiddleware = require('./middleware')
 
