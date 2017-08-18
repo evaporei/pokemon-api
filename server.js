@@ -6,8 +6,9 @@ var sequelize = new Sequelize('pokemons', null, null, {
 });
 var bodyParser = require('body-parser');
 var request = require('request-promise');
+const applyMiddleware = require('./middleware')
 
-app.use(bodyParser.json());
+applyMiddleware(app)
 
 app.listen(3000, function () {
 	console.log('Listening on http://localhost:3000');
