@@ -2,11 +2,8 @@ const glob = require('glob')
 const path = require('path')
 
 function syncModels () {
-    glob.sync('./models/*.js')
-        .forEach(filePath => {
-            if (filePath === './models/index.js')
-                return
-                
+    glob.sync('./models/*.js', { ignore: './**/index.js' })
+        .forEach(filePath => {                
             const model = require(path.resolve(filePath))
             model.sync({force: true})
                 .then(() => {
