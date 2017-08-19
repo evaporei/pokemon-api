@@ -3,12 +3,12 @@ const app = express()
 const request = require('request-promise')
 const applyMiddleware = require('./middleware')
 const syncModels = require('./models')
-const setRoutes = require('./modules')
+const modules = require('./modules')
 const PORT = 3000
 syncModels()
 
 applyMiddleware(app)
-setRoutes(app)
+modules(app)
 
 app.listen(PORT, function () {
 	console.log(`Listening on http://localhost:${PORT}`)
