@@ -2,11 +2,8 @@ const glob = require('glob')
 const path = require('path')
 
 function setRoutes (expressApp) {
-    glob.sync('./modules/*.js')
+    glob.sync('./modules/*.js', { ignore: './**/index.js' })
         .forEach(filePath => {
-            if (filePath === './modules/index.js')
-                return
-            
             const route = require(path.resolve(filePath))
             route(expressApp)
         })
