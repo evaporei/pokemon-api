@@ -1,5 +1,4 @@
 const glob = require('glob')
-const path = require('path')
 const Router = require('express').Router
 
 function setRoutes (expressApp) {
