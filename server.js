@@ -5,8 +5,8 @@ const applyMiddleware = require('./middleware')
 const syncModels = require('./models')
 const modules = require('./modules')
 const PORT = 3000
-syncModels()
 
+syncModels()
 applyMiddleware(app)
 modules(app)
 
