@@ -11,6 +11,13 @@ function syncModels () {
                                 .replace('.js', '')
                                 .toUpperCase()} model is ready!`)
                 })
+                .catch(error => {
+                    console.log(`Error on loading
+                                ${filePath.replace('./models/', '')
+                                .replace('.js', '')
+                                .toUpperCase()} model.
+                                ${error}`)
+                })
         })
 }
 
