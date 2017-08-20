@@ -2,9 +2,12 @@ const pokemonRepository = require('./pokemonRepository')
 const requestPromise = require('request-promise')
 
 exports.getPokemon = (request, response, next) => {
-    pokemonRepository.getPokemon()
+    pokemonRepository.getPokemon(request.query)
         .then(pokemon => response.json(pokemon))
-        .catch(error => response.status(500).json({error: 'Internal Server error'}))
+        .catch(error => {
+            console.log('error', error)
+            response.status(500).json({error: 'Internal Server error'})
+        })
 }
 
 exports.createPokemon = (request, response, next) => {
