@@ -46,11 +46,31 @@ exports.createPokemon = (request, response, next) => {
 }
 
 exports.buyPokemon = (request, response, next) => {
+
+    const requestPokemon = Object.assign({}, request.body)
+
+    if (!requestPokemon.name) {
+        response.status(400).json({error: 'No pokemon name sent'})
+        return
+    }
+
+    if (!requestPokemon.quantity) {
+        response.status(400).json({error: 'A quantity of pokemon should be sent'})
+        return
+    }
+
+    requestPokemon.quantity = parseInt(requestPokemon.quantity)
+
+    if (isNaN(requestPokemon.quantity)) {
+        response.status(400).json({error: 'The quantity value should be an integer'})
+        return
+    }
+
     pokemonRepository.findByName(request.body.name)
         .then(pokemon => {
             if (pokemon === null)
                 return response.status(404).json({error: 'Pokemon not found with this name'})
-            if (pokemon.stock < request.body.quantity) {
+            if (pokemon.stock < requestPokemon.quantity) {
                 return response.status(400).json({
                     error: 'Not enought ' + pokemon.name + ' in stock: ' + pokemon.stock
                 })
@@ -60,8 +80,8 @@ exports.buyPokemon = (request, response, next) => {
                 uri: 'https://api.pagar.me/1/transactions',
                 method: 'POST',
                 json: {
-                    api_key: "ak_test_WHgSu2XFmvoopAZMetV3LfA2RfEEQg",
-                    amount: pokemon.price * request.body.quantity * 100,
+                    api_key: "ak_test_Hrj7ld8Uf5P5HqCTCf8npUcLljQB7T",
+                    amount: pokemon.price * requestPokemon.quantity * 100,
                     card_number: "4024007138010896",
                     card_expiration_date: "1050",
                     card_holder_name: "Ash Ketchum",
@@ -69,23 +89,23 @@ exports.buyPokemon = (request, response, next) => {
                     metadata: {
                         product: 'pokemon',
                         name: pokemon.name,
-                        quantity: request.body.quantity
+                        quantity: requestPokemon.quantity
                     }
                 }
-            }).catch(error => {
+            })
+            .then(body => {
+                if (body.status == 'paid') {
+                    pokemon.stock = pokemon.stock - requestPokemon.quantity
+                    return pokemon.save()
+                            .then(pokemon => response.json(body))
+                }
+            })
+            .catch(error => {
                 // console.log(JSON.stringify(error, null, 2))
                 return response.status(error.response.statusCode).json(error.response.body)
             })
         })
-        .then(body => {
-            if (body.status == 'paid') {
-
-                pokemon.stock = pokemon.stock - request.body.quantity
-                return pokemon.save()
-                        .then(pokemon => response.json(body))
-                    
-            }
-        })
+        
         .catch(error => console.log(error))
         
 }
