@@ -1,6 +1,5 @@
 const express = require('express')
 const app = express()
-const request = require('request-promise')
 const applyMiddleware = require('./middleware')
 const syncModels = require('./models')
 const modules = require('./modules')
