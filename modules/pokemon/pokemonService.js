@@ -6,14 +6,43 @@ exports.getPokemon = (request, response, next) => {
         .then(pokemon => response.json(pokemon))
         .catch(error => {
             console.log('error', error)
-            response.status(500).json({error: 'Internal Server error'})
+            response.status(500).json({error: 'Internal Server Error'})
         })
 }
 
 exports.createPokemon = (request, response, next) => {
+    const pokemon = Object.assign({}, request.body)
+
+    pokemon.price = parseInt(pokemon.price)
+
+    if (isNaN(pokemon.price)) {
+        response.status(400).json({error: 'Price needs to be an integer!'})
+        return
+    }
+
+    if (pokemon.stock) {
+        pokemon.stock = parseInt(pokemon.stock)
+        if (isNaN(pokemon.stock)) {
+            response.status(400).json({error: 'Stock needs to be an integer!'})
+            return
+        }
+    }
+
     pokemonRepository.createPokemon(request.body)
         .then(pokemon => response.json(pokemon))
-        .catch(error => response.status(500).json({error: 'Internal Server error'}))
+        .catch(error => {
+            if (error.message.match(/price/g)) {
+                response.status(400).json({error: 'Price is mandatory!'})
+                return
+            }
+
+            if (error.message.match(/name/g)) {
+                response.status(400).json({error: 'Name is mandatory!'})
+                return
+            }
+                
+            response.status(500).json({error: 'Internal Server Error'})
+        })
 }
 
 exports.buyPokemon = (request, response, next) => {
