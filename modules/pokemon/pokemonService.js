@@ -4,108 +4,132 @@ const requestPromise = require('request-promise')
 exports.getPokemon = (request, response, next) => {
     pokemonRepository.getPokemon(request.query)
         .then(pokemon => response.json(pokemon))
-        .catch(error => {
-            console.log('error', error)
-            response.status(500).json({error: 'Internal Server Error'})// InternalServerError
+        .catch(Error, error => {
+            console.log('getPokemon() error:', error)
+            response.status(500).json({error: 'Internal Server Error'})
         })
 }
 
 exports.createPokemon = (request, response, next) => {
-    const pokemon = Object.assign({}, request.body)
+    Promise.resolve()
+    .then(() => {
+        const pokemon = Object.assign({}, request.body)
 
-    pokemon.price = parseInt(pokemon.price)
+        if (!pokemon.name)
+            throw new MandatoryFieldError('Name is mandatory!')
 
-    if (isNaN(pokemon.price)) {
-        response.status(400).json({error: 'Price needs to be an integer!'})// TypeError
-        return
-    }
+        if (!pokemon.price)
+            throw new MandatoryFieldError('Price is mandatory!')
 
-    if (pokemon.stock) {
-        pokemon.stock = parseInt(pokemon.stock)
-        if (isNaN(pokemon.stock)) {
-            response.status(400).json({error: 'Stock needs to be an integer!'})// TypeError
-            return
+        pokemon.price = parseInt(pokemon.price)
+
+        if (isNaN(pokemon.price))
+            throw new TypeError('Price needs to be an integer!')
+
+        if (pokemon.stock) {
+            pokemon.stock = parseInt(pokemon.stock)
+
+            if (isNaN(pokemon.stock))
+                throw new TypeError('Stock needs to be an integer!')
         }
-    }
 
-    pokemonRepository.createPokemon(request.body)
-        .then(pokemon => response.json(pokemon))
-        .catch(error => {
-            if (error.message.match(/price/g)) {
-                response.status(400).json({error: 'Price is mandatory!'})// MandatoryFieldError
-                return
-            }
-
-            if (error.message.match(/name/g)) {
-                response.status(400).json({error: 'Name is mandatory!'})// MandatoryFieldError
-                return
-            }
-                
-            response.status(500).json({error: 'Internal Server Error'})// InternalServerError
-        })
+        return pokemonRepository.createPokemon(request.body)
+    })
+    .then(pokemon => response.json(pokemon))
+    .catch(TypeError, typeError => {
+        console.log('createPokemon() typeError:', typeError)
+        response.status(400).json({error: typeError.message})
+    })
+    .catch(MandatoryFieldError, mandatoryFieldError => {
+        console.log('createPokemon() mandatoryFieldError:', mandatoryFieldError)
+        response.status(400).json({error: mandatoryFieldError.message})
+    })
+    .catch(Error, error => {
+        console.log('createPokemon() error:', error)
+        response.status(500).json({error: 'Internal Server Error'})
+    })
 }
 
 exports.buyPokemon = (request, response, next) => {
 
     const requestPokemon = Object.assign({}, request.body)
 
-    if (!requestPokemon.name) {
-        response.status(400).json({error: 'No pokemon name sent'})// MandatoryFieldError
-        return
-    }
+    Promise.resolve()
+    .then(() => {
+        if (!requestPokemon.name)
+            throw new MandatoryFieldError('Name is mandatory!')
 
-    if (!requestPokemon.quantity) {
-        response.status(400).json({error: 'A quantity of pokemon should be sent'})// MandatoryFieldError
-        return
-    }
+        if (!requestPokemon.quantity)
+            throw new MandatoryFieldError('Quantity is mandatory!')
 
-    requestPokemon.quantity = parseInt(requestPokemon.quantity)
+        requestPokemon.quantity = parseInt(requestPokemon.quantity)
 
-    if (isNaN(requestPokemon.quantity)) {
-        response.status(400).json({error: 'The quantity value should be an integer'})// TypeError
-        return
-    }
+        if (isNaN(requestPokemon.quantity))
+            throw new TypeError('Quantity should be an integer')
 
-    pokemonRepository.findByName(request.body.name)
-        .then(pokemon => {
-            if (pokemon === null)
-                return response.status(404).json({error: 'Pokemon not found with this name'})// NotFoundError
-            if (pokemon.stock < requestPokemon.quantity) {
-                return response.status(400).json({
-                    error: 'Not enought ' + pokemon.name + ' in stock: ' + pokemon.stock
-                })// CustomError
+        return pokemonRepository.findByName(requestPokemon.name)
+    })
+    .then(pokemon => {
+        if (pokemon === null)
+            throw new NotFoundError('Pokemon not found with this name')
+            
+        if (pokemon.stock < requestPokemon.quantity)
+            throw new CustomError('Not enought ' + pokemon.name + ' in stock: ' + pokemon.stock)
+
+        return requestPromise({
+            uri: 'https://api.pagar.me/1/transactions',
+            method: 'POST',
+            json: {
+                api_key: "******",
+                amount: pokemon.price * requestPokemon.quantity * 100,
+                card_number: "4024007138010896",
+                card_expiration_date: "1050",
+                card_holder_name: "Ash Ketchum",
+                card_cvv: "123",
+                metadata: {
+                    product: 'pokemon',
+                    name: pokemon.name,
+                    quantity: requestPokemon.quantity
+                }
             }
-
-            return requestPromise({
-                uri: 'https://api.pagar.me/1/transactions',
-                method: 'POST',
-                json: {
-                    api_key: "******",
-                    amount: pokemon.price * requestPokemon.quantity * 100,
-                    card_number: "4024007138010896",
-                    card_expiration_date: "1050",
-                    card_holder_name: "Ash Ketchum",
-                    card_cvv: "123",
-                    metadata: {
-                        product: 'pokemon',
-                        name: pokemon.name,
-                        quantity: requestPokemon.quantity
-                    }
-                }
-            })
-            .then(body => {
-                if (body.status == 'paid') {
-                    pokemon.stock = pokemon.stock - requestPokemon.quantity
-                    return pokemon.save()
-                            .then(pokemon => response.json(body))
-                }
-            })
-            .catch(error => {
-                // console.log(JSON.stringify(error, null, 2))
-                return response.status(error.response.statusCode).json(error.response.body)// ExternalApiError
-            })
+        }).then(apiResponse => {
+            return { apiResponse, pokemon }
+        }).catch(externalApiError => {
+            console.log('buyPokemon() externalApiError', externalApiError)
+            response.status(externalApiError.response.statusCode).json(externalApiError.response.body)
         })
-        
-        .catch(error => console.log(error))
-        
+    })
+    .then(({ apiResponse, pokemon }) => {
+        if (apiResponse.status != 'paid')
+            throw new CustomError('Transaction was not paid')
+
+        pokemon.stock = pokemon.stock - requestPokemon.quantity
+
+        return pokemon.save()
+            .then(pokemon => {
+                return { apiResponse, pokemon }
+            })
+    })
+    .then(({ apiResponse, pokemon }) => response.json(apiResponse))
+    .catch(MandatoryFieldError, mandatoryFieldError => {
+        console.log('buyPokemon() mandatoryFieldError:', mandatoryFieldError)        
+        response.status(400).json({error: mandatoryFieldError.message})
+    })
+    .catch(TypeError, typeError => {
+        console.log('buyPokemon() typeError:', typeError)        
+        response.status(400).json({error: typeError.message})
+    })
+    .catch(NotFoundError, notFoundError => {
+        console.log('buyPokemon() notFoundError:', notFoundError)        
+        response.status(400).json({error: notFoundError.message})
+    })
+    .catch(CustomError, customError => {
+        console.log('buyPokemon() customError:', customError)
+        response.status(400).json({error: customError.message})
+    })
+    .catch(Error, error => {
+        console.log('buyPokemon() error:', error)
+        response.status(500).json({error: 'Internal Server Error'})
+    })
+    
 }
