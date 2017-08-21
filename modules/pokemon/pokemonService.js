@@ -33,7 +33,7 @@ exports.createPokemon = (request, response, next) => {
                 throw new TypeError('Stock needs to be an integer!')
         }
 
-        return pokemonRepository.createPokemon(request.body)
+        return pokemonRepository.createPokemon(pokemon)
     })
     .then(pokemon => response.json(pokemon))
     .catch(TypeError, typeError => {
@@ -106,11 +106,9 @@ exports.buyPokemon = (request, response, next) => {
         pokemon.stock = pokemon.stock - requestPokemon.quantity
 
         return pokemon.save()
-            .then(pokemon => {
-                return { apiResponse, pokemon }
-            })
+            .then(pokemon => apiResponse)
     })
-    .then(({ apiResponse, pokemon }) => response.json(apiResponse))
+    .then(apiResponse => response.json(apiResponse))
     .catch(MandatoryFieldError, mandatoryFieldError => {
         console.log('buyPokemon() mandatoryFieldError:', mandatoryFieldError)        
         response.status(400).json({error: mandatoryFieldError.message})
