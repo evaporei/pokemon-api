@@ -1,22 +1,21 @@
-const Sequelize = require('sequelize')
-const sequelize = new Sequelize('pokemons', null, null, {
-	dialect: 'sqlite'
-})
+function exportPokemon (sequelize, DataTypes) {
+	const Pokemon = sequelize.define('pokemon', {
+		name: {
+			type: DataTypes.STRING,
+			allowNull: false
+		},
+		price: {
+			type: DataTypes.INTEGER,
+			allowNull: false
+		},
+		stock: {
+			type: DataTypes.INTEGER,
+			allowNull: true,
+			defaultValue: 1
+		}
+	})
+	
+	return Pokemon
+}
 
-const Pokemon = sequelize.define('pokemon', {
-	name: {
-		type: Sequelize.STRING,
-		allowNull: false
-	},
-	price: {
-		type: Sequelize.INTEGER,
-		allowNull: false
-	},
-	stock: {
-		type: Sequelize.INTEGER,
-		allowNull: true,
-		defaultValue: 1
-	}
-})
-
-module.exports = Pokemon
+module.exports = exportPokemon

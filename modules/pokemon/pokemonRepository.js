@@ -1,4 +1,4 @@
-const Pokemon = require('../../models/pokemon')
+const { Pokemon } = require('../../models')
 
 exports.getPokemon = (query = {}) => {
     let pokemonQuery = {
