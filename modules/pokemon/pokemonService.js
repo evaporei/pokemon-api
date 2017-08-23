@@ -57,7 +57,7 @@ exports.createPokemon = (request, response, next) => {
         
         return pokemonRepository.createPokemon(requestPokemon)
     })
-    .then(pokemon => response.json(pokemon))
+    .then(pokemon => response.status(201).json(pokemon))
     .catch(TypeError, errorHandlers.badRequest(response))
     .catch(MandatoryFieldError, errorHandlers.badRequest(response))
     .catch(AlreadyExistsError, errorHandlers.badRequest(response))
