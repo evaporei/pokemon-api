@@ -4,6 +4,7 @@
   "description": "An express api about pokemons",
   "main": "server.js",
   "scripts": {
+    "start": "export DATABASE_NAME=pokemons && export DATABASE_USER=root && export DATABASE_PASSWORD=root && export DATABASE_HOST=localhost && node server.js",
     "dev": "export DATABASE_NAME=pokemons && export DATABASE_USER=root && export DATABASE_PASSWORD=root && export DATABASE_HOST=localhost && nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,6 +23,9 @@
     "sqlite3": "^3.1.4"
   },
   "devDependencies": {
+    "chai": "^4.1.1",
+    "chai-http": "^3.0.0",
+    "mocha": "^3.5.0",
     "nodemon": "^1.11.0"
   }
 }
