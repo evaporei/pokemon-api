@@ -1,0 +1,9 @@
+{
+    "apps": [{
+        "name": "pokemon-api-worker",
+        "script": "./server.js",
+        "watch": false,
+        "exec_mode": "cluster",
+        "instances": 0
+    }]
+}
