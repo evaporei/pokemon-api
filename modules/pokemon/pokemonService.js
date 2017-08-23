@@ -11,35 +11,35 @@ exports.getPokemon = (request, response, next) => {
 }
 
 exports.createPokemon = (request, response, next) => {
+    const requestPokemon = Object.assign({}, request.body)
+
     Promise.resolve()
     .then(() => {
-        const pokemon = Object.assign({}, request.body)
-
-        if (!pokemon.name)
+        if (!requestPokemon.name)
             throw new MandatoryFieldError('Name is mandatory!')
 
-        if (!pokemon.price)
+        if (!requestPokemon.price)
             throw new MandatoryFieldError('Price is mandatory!')
 
-        pokemon.price = parseInt(pokemon.price)
+        requestPokemon.price = parseInt(requestPokemon.price)
 
-        if (isNaN(pokemon.price))
+        if (isNaN(requestPokemon.price))
             throw new TypeError('Price needs to be an integer!')
 
-        if (pokemon.stock) {
-            pokemon.stock = parseInt(pokemon.stock)
+        if (requestPokemon.stock) {
+            requestPokemon.stock = parseInt(requestPokemon.stock)
 
-            if (isNaN(pokemon.stock))
+            if (isNaN(requestPokemon.stock))
                 throw new TypeError('Stock needs to be an integer!')
         }
 
-        return pokemonRepository.findByName(pokemon.name)
+        return pokemonRepository.findByName(requestPokemon.name)
     })
     .then(pokemon => {
         if (pokemon !== null)
             throw new AlreadyExistsError('A pokemon with this name already exists!')
         
-        return pokemonRepository.createPokemon(pokemon)
+        return pokemonRepository.createPokemon(requestPokemon)
     })
     .then(pokemon => response.json(pokemon))
     .catch(TypeError, typeError => {
@@ -61,7 +61,6 @@ exports.createPokemon = (request, response, next) => {
 }
 
 exports.buyPokemon = (request, response, next) => {
-
     const requestPokemon = Object.assign({}, request.body)
 
     Promise.resolve()
