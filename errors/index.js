@@ -14,6 +14,14 @@ function loadErrors () {
         }
     }
     global.NotFoundError = NotFoundError
+    
+    class AlreadyExistsError extends Error {
+        constructor(message) {
+            super(message)
+            this.name = 'AlreadyExistsError'
+        }
+    }
+    global.AlreadyExistsError = AlreadyExistsError
 
     class CustomError extends Error {
         constructor(message) {
