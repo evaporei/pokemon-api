@@ -4,7 +4,7 @@
   "description": "An express api about pokemons",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "export DATABASE_NAME=pokemons && export DATABASE_USER=root && export DATABASE_PASSWORD=root && export DATABASE_HOST=localhost && nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Otávio Pace",
@@ -15,6 +15,7 @@
     "cors": "^2.8.4",
     "express": "^4.15.4",
     "glob": "^7.1.2",
+    "mysql2": "^1.4.1",
     "request": "^2.81.0",
     "request-promise": "^4.0.0",
     "sequelize": "^4.5.0",
