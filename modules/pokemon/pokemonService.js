@@ -78,16 +78,16 @@ exports.buyPokemon = (request, response, next) => {
         requestPokemon.quantity = parseInt(requestPokemon.quantity)
 
         if (isNaN(requestPokemon.quantity))
-            throw new TypeError('Quantity should be an integer')
+            throw new TypeError('Quantity needs to be an integer!')
 
         return pokemonRepository.findByName(requestPokemon.name)
     })
     .then(pokemon => {
         if (pokemon === null)
-            throw new NotFoundError('Pokemon not found with this name')
+            throw new NotFoundError('Pokemon not found with this name!')
             
         if (pokemon.stock < requestPokemon.quantity)
-            throw new CustomError('Not enought ' + pokemon.name + ' in stock: ' + pokemon.stock)
+            throw new CustomError('Not enought ' + pokemon.name + ' in stock: ' + pokemon.stock + '!')
 
         return requestPromise({
             uri: 'https://api.pagar.me/1/transactions',
@@ -114,7 +114,7 @@ exports.buyPokemon = (request, response, next) => {
     })
     .then(({ apiResponse, pokemon }) => {
         if (apiResponse.status != 'paid')
-            throw new CustomError('Transaction was not paid')
+            throw new CustomError('Transaction was not paid!')
 
         pokemon.stock = pokemon.stock - requestPokemon.quantity
 
