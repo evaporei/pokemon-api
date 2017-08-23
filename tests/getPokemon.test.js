@@ -8,6 +8,8 @@ describe('GET /pokemon', () => {
         return chai.request('http://localhost:3000')
             .get('/pokemon/')
             .then(response => {
+                response.status.should.be.an('number').and.equal(200)
+
                 const pokemon = response.body
                 pokemon.should.be.an('array')
 
@@ -18,6 +20,9 @@ describe('GET /pokemon', () => {
                     poke.should.have.a.property('createdAt').and.be.an('string')
                     poke.should.have.a.property('updatedAt').and.be.an('string')
                 }
+            })
+            .catch(error => {
+                error.should.not.exist()
             })
     })
 
@@ -39,6 +44,9 @@ describe('GET /pokemon', () => {
                     poke.should.have.a.property('updatedAt').and.be.an('string')
                 }
             })
+            .catch(error => {
+                error.should.not.exist()
+            })
     })
 
     it('Should get an array with Pokemon that have 155 of price or an empty array, by using price filter', () => {
@@ -58,6 +66,9 @@ describe('GET /pokemon', () => {
                     poke.should.have.a.property('createdAt').and.be.an('string')
                     poke.should.have.a.property('updatedAt').and.be.an('string')
                 }
+            })
+            .catch(error => {
+                error.should.not.exist()
             })
     })
 
@@ -79,6 +90,9 @@ describe('GET /pokemon', () => {
                     poke.should.have.a.property('updatedAt').and.be.an('string')
                 }
             })
+            .catch(error => {
+                error.should.not.exist()
+            })
     })
 
     it('Should get an array with Pokemon that have 144 of stock, Mew of name and 123 of price or an empty array, by using stock filter', () => {
@@ -99,12 +113,15 @@ describe('GET /pokemon', () => {
                     poke.should.have.a.property('updatedAt').and.be.an('string')
                 }
             })
+            .catch(error => {
+                error.should.not.exist()
+            })
     })
 
     it('Should return an error if price is a string', () => {
         return chai.request('http://localhost:3000')
             .get('/pokemon/')
-            .query({ price: 'asdf' })
+            .query({ price: 'NOT AN INTEGER' })
             .then(response => {
                 response.should.not.exist()
             })
@@ -119,7 +136,7 @@ describe('GET /pokemon', () => {
     it('Should return an error if stock is a string', () => {
         return chai.request('http://localhost:3000')
             .get('/pokemon/')
-            .query({ stock: 'asdf' })
+            .query({ stock: 'NOT AN INTEGER' })
             .then(response => {
                 response.should.not.exist()
             })
