@@ -32,4 +32,19 @@ function loadErrors () {
     global.CustomError = CustomError
 }
 
-module.exports = loadErrors
+const errorHandlers = {
+    badRequest: (response) => {
+        return (error) => {
+            console.log(error)
+            response.status(400).json({error: error.message})
+        }
+    },
+    internalServer: (response) => {
+        return error => {
+            console.log(error)
+            response.status(500).json({error: 'Internal Server Error'})
+        }
+    }
+}
+
+module.exports = { loadErrors, errorHandlers }

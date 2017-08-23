@@ -1,7 +1,7 @@
 const bluebird = require('bluebird')
 global.Promise = bluebird
-const loadErrors = require('./errors')
-loadErrors()
+const errors = require('./errors')
+errors.loadErrors()
 
 const express = require('express')
 const app = express()
