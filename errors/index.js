@@ -34,7 +34,7 @@ function loadErrors () {
 
 const errorHandlers = {
     badRequest: (response) => {
-        return (error) => {
+        return error => {
             console.log(error)
             response.status(400).json({error: error.message})
         }
@@ -43,6 +43,12 @@ const errorHandlers = {
         return error => {
             console.log(error)
             response.status(500).json({error: 'Internal Server Error'})
+        }
+    },
+    general: (response, statusCode, message) => {
+        return error => {
+            console.log(error)
+            response.status(statusCode).json({error: message || error.message})
         }
     }
 }
