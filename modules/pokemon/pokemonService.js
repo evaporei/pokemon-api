@@ -1,13 +1,29 @@
 const pokemonRepository = require('./pokemonRepository')
 const requestPromise = require('request-promise')
+const { errorHandlers } = require('../../errors')
 
 exports.getPokemon = (request, response, next) => {
-    pokemonRepository.getPokemon(request.query)
-        .then(pokemon => response.json(pokemon))
-        .catch(Error, error => {
-            console.log('getPokemon() error:', error)
-            response.status(500).json({error: 'Internal Server Error'})
-        })
+    const pokemonQuery = Object.assign({}, request.query)
+
+    Promise.resolve()
+    .then(() => {
+        if (pokemonQuery.price) {
+            pokemonQuery.price = parseInt(pokemonQuery.price)
+            if (isNaN(pokemonQuery.price))
+                throw new TypeError('Price needs to be an integer!')
+        }
+
+        if (pokemonQuery.stock) {
+            pokemonQuery.stock = parseInt(pokemonQuery.stock)
+            if (isNaN(pokemonQuery.stock))
+                throw new TypeError('Stock needs to be an integer!')
+        }
+
+        return pokemonRepository.getPokemon(pokemonQuery)
+    })
+    .then(pokemon => response.json(pokemon))
+    .catch(TypeError, errorHandlers.badRequest(response))
+    .catch(Error, errorHandlers.internalServer(response))
 }
 
 exports.createPokemon = (request, response, next) => {
@@ -42,22 +58,10 @@ exports.createPokemon = (request, response, next) => {
         return pokemonRepository.createPokemon(requestPokemon)
     })
     .then(pokemon => response.json(pokemon))
-    .catch(TypeError, typeError => {
-        console.log('createPokemon() typeError:', typeError)
-        response.status(400).json({error: typeError.message})
-    })
-    .catch(MandatoryFieldError, mandatoryFieldError => {
-        console.log('createPokemon() mandatoryFieldError:', mandatoryFieldError)
-        response.status(400).json({error: mandatoryFieldError.message})
-    })
-    .catch(AlreadyExistsError, alreadyExistsError => {
-        console.log('createPokemon() alreadyExistsError:', alreadyExistsError)
-        response.status(400).json({error: alreadyExistsError.message})
-    })
-    .catch(Error, error => {
-        console.log('createPokemon() error:', error)
-        response.status(500).json({error: 'Internal Server Error'})
-    })
+    .catch(TypeError, errorHandlers.badRequest(response))
+    .catch(MandatoryFieldError, errorHandlers.badRequest(response))
+    .catch(AlreadyExistsError, errorHandlers.badRequest(response))
+    .catch(Error, error => errorHandlers.internalServer(response))
 }
 
 exports.buyPokemon = (request, response, next) => {
@@ -104,7 +108,7 @@ exports.buyPokemon = (request, response, next) => {
         }).then(apiResponse => {
             return { apiResponse, pokemon }
         }).catch(externalApiError => {
-            console.log('buyPokemon() externalApiError', externalApiError)
+            console.log(externalApiError)
             response.status(externalApiError.response.statusCode).json(externalApiError.response.body)
         })
     })
@@ -118,25 +122,10 @@ exports.buyPokemon = (request, response, next) => {
             .then(pokemon => apiResponse)
     })
     .then(apiResponse => response.json(apiResponse))
-    .catch(MandatoryFieldError, mandatoryFieldError => {
-        console.log('buyPokemon() mandatoryFieldError:', mandatoryFieldError)        
-        response.status(400).json({error: mandatoryFieldError.message})
-    })
-    .catch(TypeError, typeError => {
-        console.log('buyPokemon() typeError:', typeError)        
-        response.status(400).json({error: typeError.message})
-    })
-    .catch(NotFoundError, notFoundError => {
-        console.log('buyPokemon() notFoundError:', notFoundError)        
-        response.status(400).json({error: notFoundError.message})
-    })
-    .catch(CustomError, customError => {
-        console.log('buyPokemon() customError:', customError)
-        response.status(400).json({error: customError.message})
-    })
-    .catch(Error, error => {
-        console.log('buyPokemon() error:', error)
-        response.status(500).json({error: 'Internal Server Error'})
-    })
+    .catch(MandatoryFieldError, errorHandlers.badRequest(response))
+    .catch(TypeError, errorHandlers.badRequest(response))
+    .catch(NotFoundError, errorHandlers.badRequest(response))
+    .catch(CustomError, errorHandlers.badRequest(response))
+    .catch(Error, error => errorHandlers.internalServer(response))
     
 }

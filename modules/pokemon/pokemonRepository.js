@@ -3,25 +3,18 @@ const { Pokemon } = require('../../models')
 exports.getPokemon = (query = {}) => {
     let pokemonQuery = {
         where: { 
-            $and: [
-                {name: { $like: query.name ? `%${query.name}%` : '%%' }},
-                {price: { $eq: query.price }},
-                {stock: { $eq: query.stock }}
-            ]
+            name: { $like: query.name ? `%${query.name}%` : '%%' },
+            price: { $eq: query.price },
+            stock: { $eq: query.stock }
+            
         }
     }
 
-    if (!query.price) {
-        let priceObject = pokemonQuery.where.$and.find(obj => obj.price)
-        let indexOfPriceObject = pokemonQuery.where.$and.indexOf(priceObject)
-        pokemonQuery.where.$and.splice(indexOfPriceObject)
-    }
+    if (!query.price)
+        delete pokemonQuery.where.price
 
-    if (!query.stock) {
-        let stockObject = pokemonQuery.where.$and.find(obj => obj.stock)
-        let indexOfStockObject = pokemonQuery.where.$and.indexOf(stockObject)
-        pokemonQuery.where.$and.splice(indexOfStockObject)
-    }
+    if (!query.stock)
+        delete pokemonQuery.where.stock
 
     return Pokemon.findAll(pokemonQuery)
 }
