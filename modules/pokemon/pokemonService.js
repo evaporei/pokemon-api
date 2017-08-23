@@ -33,6 +33,12 @@ exports.createPokemon = (request, response, next) => {
                 throw new TypeError('Stock needs to be an integer!')
         }
 
+        return pokemonRepository.findByName(pokemon.name)
+    })
+    .then(pokemon => {
+        if (pokemon !== null)
+            throw new AlreadyExistsError('A pokemon with this name already exists!')
+        
         return pokemonRepository.createPokemon(pokemon)
     })
     .then(pokemon => response.json(pokemon))
@@ -43,6 +49,10 @@ exports.createPokemon = (request, response, next) => {
     .catch(MandatoryFieldError, mandatoryFieldError => {
         console.log('createPokemon() mandatoryFieldError:', mandatoryFieldError)
         response.status(400).json({error: mandatoryFieldError.message})
+    })
+    .catch(AlreadyExistsError, alreadyExistsError => {
+        console.log('createPokemon() alreadyExistsError:', alreadyExistsError)
+        response.status(400).json({error: alreadyExistsError.message})
     })
     .catch(Error, error => {
         console.log('createPokemon() error:', error)
