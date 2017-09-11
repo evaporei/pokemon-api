@@ -25,3 +25,14 @@ $ sh deploy.sh
 ```
   - Deve-se ficar atento(a) as variáveis inseridas no ./deploy.sh
 
+# Melhorias a serem feitas
+
+  - Adição de paginação a rota de busca de pokemons
+  - Remoção da manipulação do objeto global, e importação dos Erros customizados quando necessários (Troca da função loadErrors para export dos erros em sí)
+  - Extração de validações para funções genéricas
+  - Utilização de Docker Swarm ao invés de PM2 com cluster mode
+  - Extrair todas as credenciais de acesso do repositório Git
+  - Trocar sistema de erro único para array/vetor de erros
+  - Tratamento de erro para criação de novos modules e models que não estão no padrão adequado
+  - Organização dos testes
+  - Troca do módulo request-promise para pagarme
